@@ -1,5 +1,6 @@
 # Clean Code
 My personal notes on the book Clean Code - A Handbook of Agile Software Craftsmanship by Robert C. Martin
+
 I only added notes that are new knowledge to me, and excluded info I already know and practise
 
 # Index
@@ -11,31 +12,18 @@ I only added notes that are new knowledge to me, and excluded info I already kno
 5. [Formatting](#formatting) 
 
 
-# <a name="foreword">Foreword</a>
-Small things matter. God is in the details.
-
-80% or more of what we do is quaintly called "maintenance": the act or repair.
-
-They introduce us the concept of Total Productive Maintenance (TMP) (1951 from the Japaneses):
-* **Seiri**: Knowing where things are: naming is crucial.
-* **Seiton**: A piece of code should be where you expect to find it.
-* **Seiso**: Keep the workplace free of unuseful things (comments, etc).
-* **Seiketsu**: Standardization. The group agrees about how to keep the workplace clean.
-* **Shutsuke**: Discipline. Follow the practices.
-
-
 # <a name="clean-code">1. Clean Code</a>
- There is, after all, a difference between code that is easy to read and code that is easy to change. 
+- There is, after all, a difference between code that is easy to read and code that is easy to change. 
  
-Code, without tests, is not clean. 
+- Code, without tests, is not clean. 
 
-Small code is better than large code 
+- Small code is better than large code 
 
-Clean code always looks like it was written by someone who cares. There is nothing obvious that you can do to make it better. 
+- Clean code always looks like it was written by someone who cares. There is nothing obvious that you can do to make it better. 
  
-Simple code: contains no duplication - Minimizes the number of entities such as classes,methods, functions, and the like
+- Simple code: contains no duplication - Minimizes the number of entities such as classes,methods, functions, and the like
 
-Reduced duplication, high expressiveness, and early building of simple abstractions. That’s what makes clean code for me
+- Reduced duplication, high expressiveness, and early building of simple abstractions. That’s what makes clean code for me
  
 
 # <a name="meaningful-names">2. Meaningful Names</a>
@@ -91,17 +79,17 @@ We can go further and write a simple class for cells instead of using an array o
 ```
 
 ## Avoid Disinformation 
-Do not refer to a grouping of **accounts** as an **accountList** unless it’s actually a *List*.
+- Do not refer to a grouping of **accounts** as an **accountList** unless it’s actually a *List*.
 The word list means something specific to programmers. If the container holding the
 accounts is not actually a List, it may lead to false conclusions.1 So **accountGroup** or
 **bunchOfAccounts** or just plain **accounts** would be better.
 
-Beware of using names which vary in small ways. How long does it take to spot the
+- Beware of using names which vary in small ways. How long does it take to spot the
 subtle difference between a *XYZControllerForEfficientHandlingOfStrings* in one module
 and, somewhere a little more distant, *XYZControllerForEfficientStorageOfStrings*?
 
 
-A truly awful example of disinformative names would be the use of lower-case *L* or
+- A truly awful example of disinformative names would be the use of lower-case *L* or
 uppercase *O* as variable names, especially in combination. The problem, of course, is that
 they look almost entirely like the constants one and zero
 
@@ -122,11 +110,11 @@ else
  }
 ```
 
-This function reads much better when source and destination are used for the argument
+- This function reads much better when source and destination are used for the argument
 names.
 
 
-The word *variable* should never appear in a variable name. The word *table* should never appear in a table name. How is *NameString* better than
+- The word *variable* should never appear in a variable name. The word *table* should never appear in a table name. How is *NameString* better than
 *Name*? Would a *Name* ever be a floating point number?
 
 
@@ -164,9 +152,9 @@ Complex fulcrumPoint = new Complex(23.0);
 Consider enforcing their use by making the corresponding constructors private.
 
 ## Don’t Be Cute
-Choose clarity over entertainment value.
+- Choose clarity over entertainment value.
 
-Cuteness in code often appears in the form of colloquialisms or slang. For example,
+- Cuteness in code often appears in the form of colloquialisms or slang. For example,
 don’t use the name *whack()* to mean *kill()*. Don’t tell little culture-dependent jokes like
 *eatMyShorts()* to mean *abort()*.
 
@@ -178,9 +166,9 @@ remember which method name goes with which class?
 
 
 ## Don’t Pun
-Avoid using the same word for two purposes
+- Avoid using the same word for two purposes
 
-If you follow the “one word per concept” rule, you could end up with many classes
+- If you follow the “one word per concept” rule, you could end up with many classes
 that have, for example, an *add* method. As long as the parameter lists and return values of
 the various add methods are semantically **equivalent**, all is well.
 
@@ -196,7 +184,7 @@ abstraction, such as *getHtml()*; others that are at an intermediate level of ab
 as: *String pagePathName = PathParser.render(pagePath)*; and still others that are remarkably low level, such as: *.append("\n")*.
 
 ## Reading Code from Top to Bottom: The Stepdown Rule
-We want the code to read like a top-down narrative.5 We want every function to be followed by 
+- We want the code to read like a top-down narrative. We want every function to be followed by 
 those at the next level of abstraction so that we can read the program, descending
 one level of abstraction at a time as we read down the list of functions. I call this The Stepdown Rule:
 
@@ -209,20 +197,20 @@ To search the parent. . .*
 
 
 ## Function Arguments
-Use as much arguements as possible. Ideal is zero, one or two. Three or more should be avoided where possible
+- Use as much arguements as possible. Ideal is zero, one or two. Three or more should be avoided where possible
 Testing function with no arguements is far easier
 
-If a function is going to transform its input argument, the transformation should appear as the return value. 
+- If a function is going to transform its input argument, the transformation should appear as the return value. 
 Indeed, *StringBuffer transform(StringBuffer in)* is better than *void transform-(StringBuffer out)*, even if the
 implementation in the first case simply returns the input argument. At least it still follows
 the form of a transformation. 
 
 
-Passing a boolean into a function is a truly terrible practice. It immediately complicates the signature of the method, loudly proclaiming that this function
+- Passing a boolean into a function is a truly terrible practice. It immediately complicates the signature of the method, loudly proclaiming that this function
 does more than one thing. It does one thing if the flag is true and another if the flag is false!
 
 
-When a function seems to need more than two or three arguments, it is likely that some of
+- When a function seems to need more than two or three arguments, it is likely that some of
 those arguments ought to be wrapped into a class of their own. Consider, for example, the
 difference between the two following declarations:
 
@@ -234,7 +222,7 @@ Circle makeCircle(Point center, double radius);*
 
 
 ## No Side Effects
-This function uses a standard algorithm to match a userName to a password. It returns true if they match
+- This function uses a standard algorithm to match a userName to a password. It returns true if they match
 and false if anything goes wrong. But it also has a side effect
 
 ```java
@@ -255,16 +243,15 @@ public class UserValidator {
 }
 ```
 
-The side effect is the call to *Session.initialize()*, of course. The *checkPassword* function, by its name, says that it checks the password. The name does not imply that it initializes the session. So a caller who believes what the name of the function says runs the risk
+- The side effect is the call to `Session.initialize()`, of course. The `checkPassword` function, by its name, says that it checks the password. The name does not imply that it initializes the session. So a caller who believes what the name of the function says runs the risk
 of erasing the existing session data when he or she decides to check the validity of the user
 
 
-This side effect creates a **temporal coupling**. That is, *checkPassword* can only be called at certain times (in other words, when it is safe to initialize the session). 
+- This side effect creates a **temporal coupling**. That is, *checkPassword* can only be called at certain times (in other words, when it is safe to initialize the session). 
 If it is called out of order, session data may be inadvertently lost. 
 Temporal couplings are confusing, especially when hidden as a side effect.
 If you must have a temporal coupling, you should make it clear in the name of the function. 
-In this case we might rename the function *checkPasswordAndInitializeSession*
-thing.”
+In this case we might rename the function `checkPasswordAndInitializeSession`
 
 
 ## Output Arguments
@@ -296,7 +283,7 @@ setAttribute("username", "unclebob");
 ```
 
 ## Extract Try/Catch Blocks
-*Try/catch* blocks are ugly in their own right. They confuse the structure of the code and
+`Try/catch` blocks are ugly in their own right. They confuse the structure of the code and
 mix error processing with normal processing. So it is better to extract the bodies of the try
 and catch blocks out into functions of their own.
 
@@ -338,7 +325,7 @@ errors should do nothing else
 
 
 ## The Error.java Dependency Magnet
-*Error.java* Classes are a dependency magnet; many other classes must import and use
+`Error.java` Classes are a dependency magnet; many other classes must import and use
 them. Thus, when the Error enum changes, all those other classes need to be recompiled
 and redeployed.
 
@@ -348,11 +335,11 @@ the exception class. They can be added without forcing any recompilation or rede
 
 # <a name="functions">3. Functions</a>
 
-Use comments only when your code fails to express itself
+- Use comments only when your code fails to express itself
 
-Comments don't usually evolve and change when the code does
+- Comments don't usually evolve and change when the code does
 
-One of the more common motivations for writing comments is bad code. We write a module and we know it is confusing and disorganized. We know it’s a mess. So we say to ourselves, “Ooh, I’d better comment that!” No! You’d better clean it! 
+- One of the more common motivations for writing comments is bad code. We write a module and we know it is confusing and disorganized. We know it’s a mess. So we say to ourselves, “Ooh, I’d better comment that!” No! You’d better clean it! 
 
 ## Explain Yourself in Code
 Which would you rather see?
@@ -379,10 +366,10 @@ Pattern timeMatcher = Pattern.compile(
 ```
  
 ## Explanation of Intent
-Sometimes a comment goes beyond just useful information about the implementation and
+- Sometimes a comment goes beyond just useful information about the implementation and
 provides the intent behind a decision
 
-In the example below, the author is comparing two objects, and he decided that he
+- In the example below, the author is comparing two objects, and he decided that he
 wanted to sort objects of his class higher than objects of any other
 
 ```java
@@ -477,13 +464,13 @@ return buildList(text.substring(match.end()));
 ```
 
 ## Bad Comments: Mumbling - Redundant - Undeleted commented-out comments - Nonlocal info
-Most comments fall into this category. Usually they are crutches or excuses for poor code
+- Most comments fall into this category. Usually they are crutches or excuses for poor code
 or justifications for insufficient decisions, amounting to little more than the programmer
 talking to himself.
 
-Write comments that don't lie, and say what the code exactly does
+- Write comments that don't lie, and say what the code exactly does
 
-**Redundant Comments**
+## Redundant Comments
 The below code shows a simple function with a header comment that is completely redundant. The comment probably takes longer to read than the code itself.
 
 ```java
