@@ -10,6 +10,8 @@ I only added notes that are new knowledge to me, and excluded info I already kno
 3. [Functions](#functions)
 4. [Comments](#comments)
 5. [Formatting](#formatting) 
+6. [Objects and Data Structures](#objects-and-data-structures) 
+7. [Error Handling] (#error-handling)
 
 
 # <a name="clean-code">1. Clean Code</a>
@@ -624,6 +626,8 @@ flow. If the convention is followed reliably, readers will be able to trust that
 We should strive to keep our lines short. You should never have to scroll to the right
 
 ## Horizontal Openness and Density
+- I surrounded the assignment operators with white space to accentuate them
+I didn’t put spaces between the function names and the opening parenthesis
 ```java
  private void measureLine(String line) {
  lineCount++;
@@ -633,5 +637,230 @@ We should strive to keep our lines short. You should never have to scroll to the
  recordWidestLine(lineSize);
  }
 ```
-I surrounded the assignment operators with white space to accentuate them
-I didn’t put spaces between the function names and the opening parenthesis
+
+- Another use for white space is to accentuate the precedence of operators
+```java
+public class Quadratic {
+ public static double root1(double a, double b, double c) {
+ double determinant = determinant(a, b, c);
+ return (-b + Math.sqrt(determinant)) / (2*a);
+ }
+ public static double root2(int a, int b, int c) {
+ double determinant = determinant(a, b, c);
+ return (-b - Math.sqrt(determinant)) / (2*a);
+ }
+ private static double determinant(double a, double b, double c) {
+ return b*b - 4*a*c;
+ }
+}
+```
+
+## Indentation
+Bad:
+```java
+public class CommentWidget extends TextWidget
+{
+public static final String REGEXP = "^#[^\r\n]*(?:(?:\r\n)|\n|\r)?";
+public CommentWidget(ParentWidget parent, String text){super(parent, text);}
+public String render() throws Exception {return ""; }
+}
+```
+
+Good:
+```java
+public class CommentWidget extends TextWidget {
+ public static final String REGEXP = "^#[^\r\n]*(?:(?:\r\n)|\n|\r)?";
+ public CommentWidget(ParentWidget parent, String text) {
+ super(parent, text);
+ }
+ public String render() throws Exception {
+ return "";
+ }
+}
+```
+
+## Formatting Rules
+```java
+public class CodeAnalyzer implements JavaFileAnalysis {
+ private int lineCount;
+ private int maxLineWidth;
+ private int widestLineNumber;
+ private LineWidthHistogram lineWidthHistogram;
+ private int totalChars;
+ public CodeAnalyzer() {
+ lineWidthHistogram = new LineWidthHistogram();
+ }
+ public static List<File> findJavaFiles(File parentDirectory) {
+ List<File> files = new ArrayList<File>();
+ findJavaFiles(parentDirectory, files);
+ return files;
+ }
+ private static void findJavaFiles(File parentDirectory, List<File> files) {
+ for (File file : parentDirectory.listFiles()) {
+ if (file.getName().endsWith(".java"))
+ files.add(file);
+ else if (file.isDirectory())
+ findJavaFiles(file, files);
+ }
+ }
+ public void analyzeFile(File javaFile) throws Exception {
+ BufferedReader br = new BufferedReader(new FileReader(javaFile));
+ String line;
+ while ((line = br.readLine()) != null)
+ measureLine(line);
+ }
+ private void measureLine(String line) {
+ lineCount++;
+ int lineSize = line.length();
+ totalChars += lineSize;
+ lineWidthHistogram.addLine(lineSize, lineCount);
+ recordWidestLine(lineSize);
+ }
+ private void recordWidestLine(int lineSize) {
+ if (lineSize > maxLineWidth) {
+ maxLineWidth = lineSize;
+ widestLineNumber = lineCount;
+ }
+ }
+ public int getLineCount() {
+ return lineCount;
+ }
+ public int getMaxLineWidth() {
+ return maxLineWidth;
+ }
+  public int getWidestLineNumber() {
+ return widestLineNumber;
+ }
+ public LineWidthHistogram getLineWidthHistogram() {
+ return lineWidthHistogram;
+ }
+ public double getMeanLineWidth() {
+ return (double)totalChars/lineCount;
+ }
+ public int getMedianLineWidth() {
+ Integer[] sortedWidths = getSortedWidths();
+ int cumulativeLineCount = 0;
+ for (int width : sortedWidths) {
+ cumulativeLineCount += lineCountForWidth(width);
+ if (cumulativeLineCount > lineCount/2)
+ return width;
+ }
+ throw new Error("Cannot get here");
+ }
+ private int lineCountForWidth(int width) {
+ return lineWidthHistogram.getLinesforWidth(width).size();
+ }
+ private Integer[] getSortedWidths() {
+ Set<Integer> widths = lineWidthHistogram.getWidths();
+ Integer[] sortedWidths = (widths.toArray(new Integer[0]));
+ Arrays.sort(sortedWidths);
+ return sortedWidths;
+ }
+}
+```
+
+# <a name="objects-and-data-structures">6. Objects and Data Structures</a>
+
+## Data Abstraction
+The first code snippet exposes implementation (bad thing), and the second code snippet hides it.
+
+```java
+public class Point {
+ public double x;
+ public double y;
+}
+```
+
+```java
+public interface Point {
+ double getX();
+ double getY();
+ void setCartesian(double x, double y);
+ double getR();
+ double getTheta();
+ void setPolar(double r, double theta);
+}
+```
+
+- Hiding implementation is not just a matter of putting a layer of functions between
+the variables. Hiding implementation is about abstractions! A class does not simply
+push its variables out through getters and setters. Rather it exposes abstract interfaces
+that allow its users to manipulate the essence of the data, without having to know its
+implementation
+
+- Look at the two cases below. The second option is preferable. We do not want to expose
+the details of our data. Rather we want to express our data in abstract terms. This is not
+merely accomplished by using interfaces and/or getters and setters. Serious thought needs
+to be put into the best way to represent the data that an object contains. The worst option is
+to blithely add getters and setters.
+
+```java
+public interface Vehicle {
+ double getFuelTankCapacityInGallons();
+ double getGallonsOfGasoline();
+}
+```
+
+```java
+public interface Vehicle {
+ double getPercentFuelRemaining();
+}
+```
+
+# <a name="error-handling">6. Error Handling</a>
+Error handling is important, but if it obscures logic, it’s wrong.
+
+## Use Exceptions Rather Than Return Codes
+Bad:
+```java
+public class DeviceController {
+ ...
+ public void sendShutDown() {
+ DeviceHandle handle = getHandle(DEV1);
+ // Check the state of the device
+ if (handle != DeviceHandle.INVALID) {
+ // Save the device status to the record field
+ retrieveDeviceRecord(handle);
+ // If not suspended, shut down
+ if (record.getStatus() != DEVICE_SUSPENDED) {
+ pauseDevice(handle);
+ clearDeviceWorkQueue(handle);
+ closeDevice(handle);
+ } else {
+ logger.log("Device suspended. Unable to shut down");
+ }
+ } else {
+ logger.log("Invalid handle for: " + DEV1.toString());
+ }
+ }
+ ...
+}
+```
+
+Good (Algorithm for device shutdown and error handling are now separated):
+```java
+public class DeviceController {
+ ...
+ public void sendShutDown() {
+ try {
+ tryToShutDown();
+ } catch (DeviceShutDownError e) {
+ logger.log(e);
+ }
+ }
+  private void tryToShutDown() throws DeviceShutDownError {
+ DeviceHandle handle = getHandle(DEV1);
+ DeviceRecord record = retrieveDeviceRecord(handle);
+ pauseDevice(handle);
+ clearDeviceWorkQueue(handle);
+ closeDevice(handle);
+ }
+ private DeviceHandle getHandle(DeviceID id) {
+ ...
+ throw new DeviceShutDownError("Invalid handle for: " + id.toString());
+ ...
+ }
+ ...
+}
+```
+
