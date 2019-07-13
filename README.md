@@ -12,6 +12,9 @@ I only added notes that are new knowledge to me, and excluded info I already kno
 5. [Formatting](#formatting) 
 6. [Objects and Data Structures](#objects-and-data-structures) 
 7. [Error Handling] (#error-handling)
+8. [Boundaries] (#boundaries)
+9. [Unit Tests] (#unit-tests)
+
 
 
 # <a name="clean-code">1. Clean Code</a>
@@ -876,7 +879,7 @@ catch (FileNotFoundException e) {
 pass along enough information to be able to log the error in your catch
 
 ## Define the Normal Flow
-- Don't let your error-handling ruin the logic of your code. Using try-catch some
+- Don't let your error-handling ruin the logic of your code. 
 
 - The exception below clutters the logic
 ```java
@@ -948,3 +951,161 @@ public class MetricsCalculator
  }
 }
 ```
+
+# <a name="boundaries">8. Boundaries</a>
+## Exploring and Learning Boundaries
+Sometimes undestanding third-party APIs can be complex, thus using **learning test** can be beneficial to understand how APIs work.
+
+# <a name="unit-tests">9. Unit Tests</a>
+## The Three Laws of TDD
+- 1. First Law You may not write production code until you have written a failing unit test.
+- 2. Second Law You may not write more of a unit test than is sufficient to fail, and not compiling is failing.
+- 3. Third Law You may not write more production code than is sufficient to pass the currently failing test.
+
+Compare the below two code snippets. The code is has duplication and lines that are irrelevant to the test cases.
+```java
+public void testGetPageHieratchyAsXml() throws Exception
+{
+crawler.addPage(root, PathParser.parse("PageOne"));
+crawler.addPage(root, PathParser.parse("PageOne.ChildOne"));
+crawler.addPage(root, PathParser.parse("PageTwo"));
+request.setResource("root");
+request.addInput("type", "pages");
+Responder responder = new SerializedPageResponder();
+SimpleResponse response =
+ (SimpleResponse) responder.makeResponse(
+ new FitNesseContext(root), request);
+String xml = response.getContent();
+assertEquals("text/xml", response.getContentType());
+assertSubString("<name>PageOne</name>", xml);
+assertSubString("<name>PageTwo</name>", xml);
+assertSubString("<name>ChildOne</name>", xml);
+}
+public void testGetPageHieratchyAsXmlDoesntContainSymbolicLinks()
+ throws Exception
+{
+WikiPage pageOne = crawler.addPage(root, PathParser.parse("PageOne"));
+crawler.addPage(root, PathParser.parse("PageOne.ChildOne"));
+crawler.addPage(root, PathParser.parse("PageTwo"));
+PageData data = pageOne.getData();
+WikiPageProperties properties = data.getProperties();
+WikiPageProperty symLinks = properties.set(SymbolicPage.PROPERTY_NAME);
+symLinks.set("SymPage", "PageTwo");
+pageOne.commit(data);
+request.setResource("root");
+request.addInput("type", "pages");
+Responder responder = new SerializedPageResponder();
+SimpleResponse response =
+ (SimpleResponse) responder.makeResponse(
+ new FitNesseContext(root), request);
+String xml = response.getContent();
+assertEquals("text/xml", response.getContentType());
+assertSubString("<name>PageOne</name>", xml);
+assertSubString("<name>PageTwo</name>", xml);
+assertSubString("<name>ChildOne</name>", xml);
+assertNotSubString("SymPage", xml);
+}
+public void testGetDataAsHtml() throws Exception
+{
+crawler.addPage(root, PathParser.parse("TestPageOne"), "test page");
+request.setResource("TestPageOne");
+request.addInput("type", "data");
+Responder responder = new SerializedPageResponder();
+SimpleResponse response =
+ (SimpleResponse) responder.makeResponse(
+ new FitNesseContext(root), request);
+String xml = response.getContent();
+assertEquals("text/xml", response.getContentType());
+assertSubString("test page", xml);
+assertSubString("<Test", xml);
+}
+```
+
+After (clean-up):
+```java
+public void testGetPageHierarchyAsXml() throws Exception {
+ makePages("PageOne", "PageOne.ChildOne", "PageTwo");
+ submitRequest("root", "type:pages");
+ assertResponseIsXML();
+ assertResponseContains(
+ "<name>PageOne</name>", "<name>PageTwo</name>", "<name>ChildOne</name>"
+ );
+ }
+ public void testSymbolicLinksAreNotInXmlPageHierarchy() throws Exception {
+ WikiPage page = makePage("PageOne");
+ makePages("PageOne.ChildOne", "PageTwo");
+ addLinkTo(page, "PageTwo", "SymPage");
+ submitRequest("root", "type:pages");
+ assertResponseIsXML();
+ assertResponseContains(
+ "<name>PageOne</name>", "<name>PageTwo</name>", "<name>ChildOne</name>"
+ );
+ assertResponseDoesNotContain("SymPage");
+ }
+ public void testGetDataAsXml() throws Exception {
+ makePageWithContent("TestPageOne", "test page");
+ submitRequest("TestPageOne", "type:data");
+ assertResponseIsXML();
+ assertResponseContains("test page", "<Test");
+ }
+```
+
+## One Assert per Test
+- Having one assert statement in a test function can be useful. Although this is harash, it the advantage is that these test can be quick and easy to understand. 
+- Check this code for example:
+```java
+@Test
+ public void turnOnCoolerAndBlowerIfTooHot() throws Exception {
+ tooHot();
+ assertEquals("hBChl", hw.getState());
+ }
+ @Test
+ public void turnOnHeaterAndBlowerIfTooCold() throws Exception {
+ tooCold();
+ assertEquals("HBchl", hw.getState());
+ }
+ @Test
+ public void turnOnHiTempAlarmAtThreshold() throws Exception {
+ wayTooHot();
+ assertEquals("hBCHl", hw.getState());
+ }
+ @Test
+ public void turnOnLoTempAlarmAtThreshold() throws Exception {
+ wayTooCold();
+ assertEquals("HBchL", hw.getState());
+ }
+ 
+```
+## Single Concept per Test
+- Having one assertion per test function can make for **long lines of code** in some casses. A better solution for such cases is to test a single concept in a test function.
+- For example:
+```java
+/**
+ * Miscellaneous tests for the addMonths() method.
+ */
+ public void testAddMonths() {
+ SerialDate d1 = SerialDate.createInstance(31, 5, 2004);
+ SerialDate d2 = SerialDate.addMonths(1, d1);
+ assertEquals(30, d2.getDayOfMonth());
+ assertEquals(6, d2.getMonth());
+ assertEquals(2004, d2.getYYYY());
+ SerialDate d3 = SerialDate.addMonths(2, d1);
+ assertEquals(31, d3.getDayOfMonth());
+ assertEquals(7, d3.getMonth());
+ assertEquals(2004, d3.getYYYY());
+ SerialDate d4 = SerialDate.addMonths(1, SerialDate.addMonths(1, d1));
+ assertEquals(30, d4.getDayOfMonth());
+ assertEquals(7, d4.getMonth());
+ assertEquals(2004, d4.getYYYY());
+ }
+```
+
+- The above test function is still not perfect. You should minimize the number of asserts per concept and test just one concept per test function
+
+- Clean tests follow 5 rules:
+-- 1. FAST
+-- 2. INDEPENDENT: tests should not depend on each other, and should run in any order. Tests should not set-up a condition for another test
+-- 3. REPEATABLE: You should be able to run tests in any environment
+-- 4. SELF-VALIDATING: The tests should have a boolean output. Either they pass or fail. You should not have to read through a log file to tell whether the tests pass. You should not have
+        to manually compare two different text files to see whether the tests pass
+-- 5. TIMELY: write unit tests before production code
