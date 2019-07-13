@@ -1103,9 +1103,9 @@ public void testGetPageHierarchyAsXml() throws Exception {
 - The above test function is still not perfect. You should minimize the number of asserts per concept and test just one concept per test function
 
 - Clean tests follow 5 rules:
--- 1. FAST
--- 2. INDEPENDENT: tests should not depend on each other, and should run in any order. Tests should not set-up a condition for another test
--- 3. REPEATABLE: You should be able to run tests in any environment
--- 4. SELF-VALIDATING: The tests should have a boolean output. Either they pass or fail. You should not have to read through a log file to tell whether the tests pass. You should not have
+- 1. FAST
+- 2. INDEPENDENT: tests should not depend on each other, and should run in any order. Tests should not set-up a condition for another test
+- 3. REPEATABLE: You should be able to run tests in any environment
+- 4. SELF-VALIDATING: The tests should have a boolean output. Either they pass or fail. You should not have to read through a log file to tell whether the tests pass. You should not have
         to manually compare two different text files to see whether the tests pass
--- 5. TIMELY: write unit tests before production code
+- 5. TIMELY: write unit tests before production code
