@@ -807,7 +807,7 @@ public interface Vehicle {
 }
 ```
 
-# <a name="error-handling">6. Error Handling</a>
+# <a name="error-handling">7. Error Handling</a>
 Error handling is important, but if it obscures logic, it’s wrong.
 
 ## Use Exceptions Rather Than Return Codes
@@ -864,3 +864,87 @@ public class DeviceController {
 }
 ```
 
+## Write Your Try-Catch-Finally Statement First
+- Narrow down your catch statement.
+```java
+catch (FileNotFoundException e) {
+ throw new StorageException("retrieval error”, e);
+ }
+```
+## Provide Context with Exceptions
+- Create informative error messages and pass them along with your exceptions. Mention the operation that failed and the type of failure. If you are logging in your application,
+pass along enough information to be able to log the error in your catch
+
+## Define the Normal Flow
+- Don't let your error-handling ruin the logic of your code. Using try-catch some
+
+- The exception below clutters the logic
+```java
+try {
+ MealExpenses expenses = expenseReportDAO.getMeals(employee.getID());
+ m_total += expenses.getTotal();
+} catch(MealExpensesNotFound e) {
+ m_total += getMealPerDiem();
+}
+```
+This is better:
+```java
+MealExpenses expenses = expenseReportDAO.getMeals(employee.getID());
+m_total += expenses.getTotal();
+```
+
+- To make the code even simpler, we can create a class that handle special cases, aka SPECIAL CASE PATTERN. Here we can change the
+ExpenseReportDAO so that it always returns a MealExpense object. If there are no meal
+expenses, so it returns a MealExpense object that returns the per diem as its total:
+
+```java
+public class PerDiemMealExpenses implements MealExpenses {
+ public int getTotal() {
+ // return the per diem default
+ }
+}
+```
+
+## Don’t Return Null
+- Writing code that checks for `null` every other line is bad code.
+```java
+ public void registerItem(Item item) {
+ if (item != null) {
+ ItemRegistry registry = peristentStore.getItemRegistry();
+ if (registry != null) {
+ Item existing = registry.getItem(item.getID());
+ if (existing.getBillingPeriod().hasRetailOwner()) {
+ existing.register(item);
+ }
+ }
+ }
+ }
+```
+- In the code above, all it takes is one missing null check to send an application spinning out of control.
+- There is too much `null` to check. The solution is to **consider throwing an exception or returning a SPECIAL CASE object**
+
+## Don’t Pass Null
+- If you must pass `null` in your arguement, create a new exception type and throw it:
+```java
+public class MetricsCalculator
+{
+ public double xProjection(Point p1, Point p2) {
+ if (p1 == null || p2 == null) {
+ throw InvalidArgumentException(
+ "Invalid argument for MetricsCalculator.xProjection");
+ }
+ return (p2.x – p1.x) * 1.5;
+ }
+}
+```
+Using `InvalidArgumentException` means we have to define a handler and that makes the solution more complex. A better approach is to **use set of assertions**:
+```java
+public class MetricsCalculator
+{
+ public double xProjection(Point p1, Point p2) {
+ assert p1 != null : "p1 should not be null";
+ assert p2 != null : "p2 should not be null";
+ return (p2.x – p1.x) * 1.5;
+ }
+}
+```
