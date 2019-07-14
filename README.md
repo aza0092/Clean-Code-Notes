@@ -1135,7 +1135,7 @@ main, or modules called by main, and to design the rest of the system
 1. RUN ALL TESTS
 2. REFACTORING: make progress, then pause and reflect on your new design. Eliminate duplication, ensure expressiveness, and minimize the number of classes and methods.
 
-# <a name="mergence">14. Successive Refinement</a>
+# <a name="successive-refinement">13. Successive Refinement</a>
 - Observe the cleanup in the following code. Here's the before:
 
 ```java
