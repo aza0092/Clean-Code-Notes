@@ -11,9 +11,14 @@ I only added notes that are new knowledge to me, and excluded info I already kno
 4. [Comments](#comments)
 5. [Formatting](#formatting) 
 6. [Objects and Data Structures](#objects-and-data-structures) 
-7. [Error Handling] (#error-handling)
-8. [Boundaries] (#boundaries)
-9. [Unit Tests] (#unit-tests)
+7. [Error Handling](#error-handling)
+8. [Boundaries](#boundaries)
+9. [Unit Tests](#unit-tests)
+10. [Classes](#classes)
+11. [Systems](#systems)
+12. [Emergence](#emergence)
+13. [Successive Refinement](#successive-refinement)
+14. [JUnit Internals](#junit-internals)
 
 
 
@@ -1102,10 +1107,138 @@ public void testGetPageHierarchyAsXml() throws Exception {
 
 - The above test function is still not perfect. You should minimize the number of asserts per concept and test just one concept per test function
 
-- Clean tests follow 5 rules:
+## Clean tests follow 5 rules:
 - 1. FAST
 - 2. INDEPENDENT: tests should not depend on each other, and should run in any order. Tests should not set-up a condition for another test
 - 3. REPEATABLE: You should be able to run tests in any environment
 - 4. SELF-VALIDATING: The tests should have a boolean output. Either they pass or fail. You should not have to read through a log file to tell whether the tests pass. You should not have
         to manually compare two different text files to see whether the tests pass
 - 5. TIMELY: write unit tests before production code
+
+
+# <a name="classes">10. Classes</a>
+
+## Class Organization
+- a class should begin with: Public static constants, then private static variables, followed by private instance variables.
+
+## Classes Should Be Small!
+- Just like functions, classes should be small
+
+# <a name="systems">11. Systems</a>
+
+## Separation of Main
+- One way to separate construction from use is simply to move all aspects of construction to
+main, or modules called by main, and to design the rest of the system
+
+# <a name="mergence">12. Emergence</a>
+- Follow these 4 rules for good design:
+1. RUN ALL TESTS
+2. REFACTORING: make progress, then pause and reflect on your new design. Eliminate duplication, ensure expressiveness, and minimize the number of classes and methods.
+
+# <a name="mergence">14. Successive Refinement</a>
+- Observe the cleanup in the following code. Here's the before:
+
+```java
+private void parseSchemaElement(String element) throws ParseException {
+ char elementId = element.charAt(0);
+ String elementTail = element.substring(1);
+ validateSchemaElementId(elementId);
+ if (isBooleanSchemaElement(elementTail))
+ parseBooleanSchemaElement(elementId);
+ else if (isStringSchemaElement(elementTail))
+ parseStringSchemaElement(elementId);
+ else if (isIntegerSchemaElement(elementTail)) {
+ parseIntegerSchemaElement(elementId);
+ } else {
+ throw new ParseException(
+ String.format("Argument: %c has invalid format: %s.",
+ elementId, elementTail), 0);
+ }
+ }
+ private void validateSchemaElementId(char elementId) throws ParseException {
+ if (!Character.isLetter(elementId)) {
+ throw new ParseException(
+ "Bad character:" + elementId + "in Args format: " + schema, 0);
+ }
+ }
+ private void parseBooleanSchemaElement(char elementId) {
+ booleanArgs.put(elementId, false);
+ }
+ private void parseIntegerSchemaElement(char elementId) {
+ intArgs.put(elementId, 0);
+ }
+ private void parseStringSchemaElement(char elementId) {
+ stringArgs.put(elementId, "");
+ }
+ private boolean isStringSchemaElement(String elementTail) {
+ return elementTail.equals("*");
+ }
+ private boolean isBooleanSchemaElement(String elementTail) {
+ return elementTail.length() == 0;
+ }
+ private boolean isIntegerSchemaElement(String elementTail) {
+ return elementTail.equals("#");
+ }
+```
+
+Here's the after:
+
+```java
+private void parseSchemaElement(String element) throws ArgsException {
+ char elementId = element.charAt(0);
+ String elementTail = element.substring(1);
+ validateSchemaElementId(elementId);
+ if (elementTail.length() == 0)
+ marshalers.put(elementId, new BooleanArgumentMarshaler());
+ else if (elementTail.equals("*"))
+ marshalers.put(elementId, new StringArgumentMarshaler());
+ else if (elementTail.equals("#"))
+ marshalers.put(elementId, new IntegerArgumentMarshaler());
+ else if (elementTail.equals("##"))
+ marshalers.put(elementId, new DoubleArgumentMarshaler());
+ else if (elementTail.equals("[*]"))
+ marshalers.put(elementId, new StringArrayArgumentMarshaler());
+ else
+ throw new ArgsException(INVALID_ARGUMENT_FORMAT, elementId, elementTail);
+ }
+ private void validateSchemaElementId(char elementId) throws ArgsException {
+ if (!Character.isLetter(elementId))
+ throw new ArgsException(INVALID_ARGUMENT_NAME, elementId, null);
+ }
+private void parseArgumentStrings(List<String> argsList) throws ArgsException
+ {
+for (currentArgument = argsList.listIterator(); currentArgument.hasNext();)
+ {
+ String argString = currentArgument.next();
+ if (argString.startsWith("-")) {
+ parseArgumentCharacters(argString.substring(1));
+ } else {
+ currentArgument.previous();
+ break;
+ }
+ }
+ }
+```
+# <a name="junit-internals">14. JUnit Internals</a>
+- Before:
+```java
+if (expected == null || actual == null || areStringsEqual())
+ return Assert.format(message, expected, actual);
+```
+
+- After:
+```java
+if (shouldNotCompact())
+ return Assert.format(message, expected, actual);
+```
+
+- Check for positives instead of negatives. Example (Before:)
+```java
+if (shouldNotCompact())
+ return Assert.format(message, expected, actual);
+```
+
+After:
+```java
+if (canBeCompacted())
+```
