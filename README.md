@@ -1130,7 +1130,7 @@ public void testGetPageHierarchyAsXml() throws Exception {
 - One way to separate construction from use is simply to move all aspects of construction to
 main, or modules called by main, and to design the rest of the system
 
-# <a name="mergence">12. Emergence</a>
+# <a name="emergence">12. Emergence</a>
 - Follow these 4 rules for good design:
 1. RUN ALL TESTS
 2. REFACTORING: make progress, then pause and reflect on your new design. Eliminate duplication, ensure expressiveness, and minimize the number of classes and methods.
