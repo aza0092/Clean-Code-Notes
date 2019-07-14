@@ -343,7 +343,7 @@ When you use **exceptions** rather than **error codes**, then new exceptions are
 the exception class. They can be added without forcing any recompilation or redeployment
 
 
-# <a name="functions">3. Functions</a>
+# <a name="comments">4. Comments</a>
 
 - Use comments only when your code fails to express itself
 
