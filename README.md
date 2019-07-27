@@ -1,7 +1,6 @@
 # Clean Code
 My personal notes on the book Clean Code - A Handbook of Agile Software Craftsmanship by Robert C. Martin
 
-I only added notes that are new knowledge to me, and excluded info I already know and practise
 
 # Index
 
