@@ -90,7 +90,7 @@ We can go further and write a simple class for cells instead of using an array o
 ## Avoid Disinformation 
 - Do not refer to a grouping of **accounts** as an **accountList** unless it’s actually a *List*.
 The word list means something specific to programmers. If the container holding the
-accounts is not actually a List, it may lead to false conclusions.1 So **accountGroup** or
+accounts is not actually a List, it may lead to false conclusions. So **accountGroup** or
 **bunchOfAccounts** or just plain **accounts** would be better.
 
 - Beware of using names which vary in small ways. How long does it take to spot the
@@ -150,9 +150,9 @@ describe the arguments. For example,
 Complex fulcrumPoint = Complex.FromRealNumber(23.0);
 ```
 
-```java
+
 is generally better than
-```
+
 
 ```java
 Complex fulcrumPoint = new Complex(23.0);
@@ -187,8 +187,7 @@ Minimize using nested blocks
 
 ## One Level of Abstraction per Function
 In order to make sure our functions are doing “one thing,” we need to make sure that the
-statements within our function are all at the same level of abstraction. It is easy to see how
-Listing 3-1 violates this rule. There are concepts in there that are at a very high level of
+statements within our function are all at the same level of abstraction. Avoid concepts that have very high level of 
 abstraction, such as *getHtml()*; others that are at an intermediate level of abstraction, such
 as: *String pagePathName = PathParser.render(pagePath)*; and still others that are remarkably low level, such as: *.append("\n")*.
 
@@ -206,7 +205,7 @@ To search the parent. . .*
 
 
 ## Function Arguments
-- Use as much arguements as possible. Ideal is zero, one or two. Three or more should be avoided where possible
+- Use as little arguements as possible. Ideal is zero, one or two. Three or more should be avoided where possible
 Testing function with no arguements is far easier
 
 - If a function is going to transform its input argument, the transformation should appear as the return value. 
@@ -223,16 +222,18 @@ does more than one thing. It does one thing if the flag is true and another if t
 those arguments ought to be wrapped into a class of their own. Consider, for example, the
 difference between the two following declarations:
 
-*Circle makeCircle(double x, double y, double radius);
-Circle makeCircle(Point center, double radius);*
+```java
+Circle makeCircle(double x, double y, double radius);
+Circle makeCircle(Point center, double radius);
+```
 
 
-*assertEquals* might be better written as *assertExpectedEqualsActual(expected, actual)*. This strongly mitigates the problem of having to remember the ordering of the arguments
+- *assertEquals* might be better written as *assertExpectedEqualsActual(expected, actual)*. This strongly mitigates the problem of having to remember the ordering of the arguments
 
 
 ## No Side Effects
 - This function uses a standard algorithm to match a userName to a password. It returns true if they match
-and false if anything goes wrong. But it also has a side effect
+and false if anything goes wrong. But it also has a **side effect**
 
 ```java
 public class UserValidator {
@@ -259,12 +260,13 @@ of erasing the existing session data when he or she decides to check the validit
 - This side effect creates a **temporal coupling**. That is, *checkPassword* can only be called at certain times (in other words, when it is safe to initialize the session). 
 If it is called out of order, session data may be inadvertently lost. 
 Temporal couplings are confusing, especially when hidden as a side effect.
-If you must have a temporal coupling, you should make it clear in the name of the function. 
+
+- If you must have a temporal coupling, you should make it clear in the name of the function. 
 In this case we might rename the function `checkPasswordAndInitializeSession`
 
 
 ## Output Arguments
-Arguments are most naturally interpreted as inputs to a function. It's bad habit to take an argument that is actually an output rather than an input. 
+- Arguments are most naturally interpreted as inputs to a function. It's bad habit to take an argument that is actually an **output** rather than an **input** 
 
 ## Command Query Separation
 Functions should either do something or answer something, but not both. Either your
@@ -316,7 +318,7 @@ public void delete(Page page) {
  }
  catch (Exception e) {
  logError(e);
- }
+  }
  }
  private void deletePageAndAllReferences(Page page) throws Exception {
  deletePage(page);
@@ -835,10 +837,10 @@ public class DeviceController {
  closeDevice(handle);
  } else {
  logger.log("Device suspended. Unable to shut down");
- }
+  }
  } else {
  logger.log("Invalid handle for: " + DEV1.toString());
- }
+  }
  }
  ...
 }
@@ -853,7 +855,7 @@ public class DeviceController {
  tryToShutDown();
  } catch (DeviceShutDownError e) {
  logger.log(e);
- }
+  }
  }
   private void tryToShutDown() throws DeviceShutDownError {
  DeviceHandle handle = getHandle(DEV1);
@@ -922,9 +924,9 @@ public class PerDiemMealExpenses implements MealExpenses {
  Item existing = registry.getItem(item.getID());
  if (existing.getBillingPeriod().hasRetailOwner()) {
  existing.register(item);
- }
- }
- }
+    }
+   }
+  }
  }
 ```
 - In the code above, all it takes is one missing null check to send an application spinning out of control.
@@ -1055,7 +1057,7 @@ public void testGetPageHierarchyAsXml() throws Exception {
 ```
 
 ## One Assert per Test
-- Having one assert statement in a test function can be useful. Although this is harash, it the advantage is that these test can be quick and easy to understand. 
+- Having one assert statement in a test function can be useful. Although this is harsh, the advantage is that these test can be quick and easy to understand. 
 - Check this code for example:
 ```java
 @Test
@@ -1130,7 +1132,7 @@ public void testGetPageHierarchyAsXml() throws Exception {
 main, or modules called by main, and to design the rest of the system
 
 # <a name="emergence">12. Emergence</a>
-- Follow these 4 rules for good design:
+- Follow these rules for good design:
 1. RUN ALL TESTS
 2. REFACTORING: make progress, then pause and reflect on your new design. Eliminate duplication, ensure expressiveness, and minimize the number of classes and methods.
 
@@ -1152,29 +1154,35 @@ private void parseSchemaElement(String element) throws ParseException {
  throw new ParseException(
  String.format("Argument: %c has invalid format: %s.",
  elementId, elementTail), 0);
- }
+  }
  }
  private void validateSchemaElementId(char elementId) throws ParseException {
  if (!Character.isLetter(elementId)) {
  throw new ParseException(
  "Bad character:" + elementId + "in Args format: " + schema, 0);
+  }
  }
- }
+ 
  private void parseBooleanSchemaElement(char elementId) {
  booleanArgs.put(elementId, false);
  }
+ 
  private void parseIntegerSchemaElement(char elementId) {
  intArgs.put(elementId, 0);
  }
+ 
  private void parseStringSchemaElement(char elementId) {
  stringArgs.put(elementId, "");
  }
+ 
  private boolean isStringSchemaElement(String elementTail) {
  return elementTail.equals("*");
  }
+ 
  private boolean isBooleanSchemaElement(String elementTail) {
  return elementTail.length() == 0;
  }
+ 
  private boolean isIntegerSchemaElement(String elementTail) {
  return elementTail.equals("#");
  }
@@ -1200,10 +1208,12 @@ private void parseSchemaElement(String element) throws ArgsException {
  else
  throw new ArgsException(INVALID_ARGUMENT_FORMAT, elementId, elementTail);
  }
+ 
  private void validateSchemaElementId(char elementId) throws ArgsException {
  if (!Character.isLetter(elementId))
  throw new ArgsException(INVALID_ARGUMENT_NAME, elementId, null);
  }
+ 
 private void parseArgumentStrings(List<String> argsList) throws ArgsException
  {
 for (currentArgument = argsList.listIterator(); currentArgument.hasNext();)
@@ -1214,8 +1224,8 @@ for (currentArgument = argsList.listIterator(); currentArgument.hasNext();)
  } else {
  currentArgument.previous();
  break;
- }
- }
+   }
+  }
  }
 ```
 # <a name="junit-internals">14. JUnit Internals</a>
@@ -1231,13 +1241,7 @@ if (shouldNotCompact())
  return Assert.format(message, expected, actual);
 ```
 
-- Check for positives instead of negatives. Example (Before:)
-```java
-if (shouldNotCompact())
- return Assert.format(message, expected, actual);
-```
-
-After:
+- Also, it is more ideal to check for positives instead of negatives
 ```java
 if (canBeCompacted())
 ```
